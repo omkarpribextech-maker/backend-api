@@ -1,45 +1,48 @@
 package com.om.demo.controller;
 
-import com.om.demo.dto.UpdateProfileRequest;
+import com.om.demo.dto.*;
 import com.om.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     UserService userService;
 
-    @PostMapping("/update-profile/{id}")
-    public String updateProfile(@PathVariable Long id,
-                                @RequestBody UpdateProfileRequest req){
-        return userService.updateProfile(id, req);
+    // Update profile: fullName, phone
+    @PutMapping("/{userId}/profile")
+    public String updateProfile(@PathVariable Long userId,
+                                @RequestBody UpdateProfileRequest req) {
+        return userService.updateProfile(userId, req);
     }
 
-    @GetMapping("/is-profile-updated/{id}")
-    public boolean check(@PathVariable Long id){
-        return userService.isProfileUpdated(id);
+    // Check if profile updated
+    @GetMapping("/{userId}/isProfileUpdated")
+    public boolean isProfileUpdated(@PathVariable Long userId) {
+        return userService.isProfileUpdated(userId);
     }
 
-    @PostMapping("/update-location/{id}")
-    public String updateLocation(@PathVariable Long id,
-                                 @RequestParam Double lat,
-                                 @RequestParam Double lng){
-        return userService.updateLocation(id, lat, lng);
+    // Update location
+    @PutMapping("/{userId}/location")
+    public String updateLocation(@PathVariable Long userId,
+                                 @RequestBody LocationUpdateRequest req) {
+        return userService.updateLocation(userId, req.lat, req.lng);
     }
 
-    @PostMapping("/interests/{id}")
-    public String updateInterests(@PathVariable Long id,
-                                  @RequestBody List<Long> interestIds){
-        return userService.updateInterests(id, interestIds);
+    // Update interest categories by IDs
+    @PutMapping("/{userId}/interests")
+    public String updateInterests(@PathVariable Long userId,
+                                  @RequestBody InterestsRequest req) {
+        return userService.updateInterests(userId, req.interestIds);
+    }
+
+    // Get basic user (optional - for quick check)
+    @GetMapping("/{userId}")
+    public Object getUser(@PathVariable Long userId) {
+        return userService.getUserForResponse(userId);
     }
 }

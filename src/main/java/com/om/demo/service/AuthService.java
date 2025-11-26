@@ -2,6 +2,7 @@ package com.om.demo.service;
 
 import com.om.demo.dto.SignInRequest;
 import com.om.demo.dto.SignUpRequest;
+import com.om.demo.dto.ResetPasswordRequest;
 import com.om.demo.model.PasswordResetToken;
 import com.om.demo.model.User;
 import com.om.demo.repository.PasswordResetTokenRepository;
@@ -45,6 +46,9 @@ public class AuthService {
         return "Login successful";
     }
 
+    /**
+     * Request a password reset. Returns generated token (in prod you'd email it).
+     */
     public String forgetPassword(String email) {
         User user = userRepo.findByEmail(email);
         if (user == null) return "User not found";
@@ -58,6 +62,30 @@ public class AuthService {
 
         tokenRepo.save(pr);
 
+        // In real app, send token via email. For now return the token (so you can test).
         return token;
+    }
+
+    /**
+     * Reset password using token
+     */
+    public String resetPassword(ResetPasswordRequest req) {
+        PasswordResetToken pr = tokenRepo.findByToken(req.token);
+        if (pr == null) return "Invalid token";
+
+        if (pr.getExpiryTime().isBefore(LocalDateTime.now())) {
+            return "Token expired";
+        }
+
+        User user = userRepo.findByEmail(pr.getEmail());
+        if (user == null) return "User not found";
+
+        user.setPassword(req.newPassword);
+        userRepo.save(user);
+
+        // optional: delete token after use
+        tokenRepo.delete(pr);
+
+        return "Password updated successfully";
     }
 }

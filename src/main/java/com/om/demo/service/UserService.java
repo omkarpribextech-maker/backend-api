@@ -60,5 +60,22 @@ public class UserService {
         userRepo.save(user);
         return "Interests updated";
     }
-}
 
+    // helper: return user (but avoid sending password in real app)
+    public Object getUserForResponse(Long userId) {
+        User user = userRepo.findById(userId).orElse(null);
+        if (user == null) return "User not found";
+
+        // create a simple safe response map
+        return new java.util.HashMap<String, Object>() {{
+            put("id", user.getId());
+            put("fullName", user.getFullName());
+            put("email", user.getEmail());
+            put("phone", user.getPhone());
+            put("isProfileUpdated", user.isProfileUpdated());
+            put("latitude", user.getLatitude());
+            put("longitude", user.getLongitude());
+            put("interests", user.getInterests());
+        }};
+    }
+}

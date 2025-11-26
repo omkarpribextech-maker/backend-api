@@ -4,4 +4,3 @@ public class UpdateProfileRequest {
     public String fullName;
     public String phone;
 }
-
