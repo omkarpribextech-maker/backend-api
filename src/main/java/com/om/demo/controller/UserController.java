@@ -5,6 +5,8 @@ import com.om.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -45,4 +47,10 @@ public class UserController {
     public Object getUser(@PathVariable Long userId) {
         return userService.getUserForResponse(userId);
     }
+    @GetMapping("/suggest-username")
+    public List<String> suggestUsernames(@RequestParam String firstName,
+                                         @RequestParam String lastName) {
+        return userService.suggestUsernames(firstName, lastName);
+    }
+
 }

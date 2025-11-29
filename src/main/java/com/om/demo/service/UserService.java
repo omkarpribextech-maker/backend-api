@@ -24,7 +24,9 @@ public class UserService {
 
         if (user == null) return "User not found";
 
-        user.setFullName(req.fullName);
+        user.setFirstName(req.firstName);
+        user.setLastName(req.lastName);
+        user.setUsername(req.username);
         user.setPhone(req.phone);
         user.setProfileUpdated(true);
 
@@ -69,7 +71,8 @@ public class UserService {
         // create a simple safe response map
         return new java.util.HashMap<String, Object>() {{
             put("id", user.getId());
-            put("fullName", user.getFullName());
+            put("first name",user.getFirstName());
+            put("last name",user.getLastName());
             put("email", user.getEmail());
             put("phone", user.getPhone());
             put("isProfileUpdated", user.isProfileUpdated());
@@ -77,5 +80,22 @@ public class UserService {
             put("longitude", user.getLongitude());
             put("interests", user.getInterests());
         }};
+    }
+    public List<String> suggestUsernames(String firstName, String lastName) {
+
+        String f = firstName.toLowerCase();
+        String l = lastName.toLowerCase();
+
+        return List.of(
+                f + "_" + l,
+                f + "." + l,
+                f + l,
+                f + "_" + (int)(Math.random()*900 + 100),   // firstname_123
+                f + l + (int)(Math.random()*900 + 100),    // firstnamelastname123
+                f.substring(0, 1) + l                      // f + lastname
+        );
+    }
+    public User getUserEntity(Long userId) {
+        return userRepo.findById(userId).orElse(null);
     }
 }

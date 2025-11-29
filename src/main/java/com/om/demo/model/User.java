@@ -20,7 +20,12 @@ public class User {
     private Long id;
 
 
-    private String fullName;
+    private String firstName;
+    private String lastName;
+
+    @Column(unique = true)
+    private String username; // unique username
+
 
 
     @Column(unique = true)

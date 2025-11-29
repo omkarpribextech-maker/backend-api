@@ -24,7 +24,6 @@ public class AuthService {
         if (userRepo.existsByPhone(req.phone)) return "Phone already exists";
 
         User user = new User();
-        user.setFullName(req.fullName);
         user.setEmail(req.email);
         user.setPhone(req.phone);
         user.setPassword(req.password);
