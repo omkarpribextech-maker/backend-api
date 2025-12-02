@@ -4,5 +4,11 @@ package com.om.demo.dto;
 public class LocationUpdateRequest {
     public Double lat;
     public Double lng;
-    public String pincode; // optional
+    public String pincode;
+
+    public String country;
+    public String state;
+    public String district;
+    public String city;
+    public String area;
 }

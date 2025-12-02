@@ -1,74 +1,114 @@
 package com.om.demo.controller;
 
+
 import com.om.demo.dto.SignInRequest;
+import com.om.demo.dto.SignUpCompleteResponse;
 import com.om.demo.dto.SignUpRequest;
+import com.om.demo.dto.VerifyOtpResponse;
 import com.om.demo.service.AuthService;
 import com.om.demo.service.OtpService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import jakarta.validation.Valid;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+
     @Autowired
     private AuthService authService;
+
 
     @Autowired
     private OtpService otpService;
 
-    // ---------------- SIGN IN ----------------
+
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req){
         return ResponseEntity.ok(Map.of("message", authService.signIn(req)));
     }
 
-    // ---------------- SIGNUP FLOW ----------------
+
+    // Signup OTP flow
     @PostMapping("/signup/request-otp")
-    public ResponseEntity<?> signupRequestOtp(@RequestParam String identifier) {
+    public ResponseEntity<?> signupRequestOtp(@RequestParam String identifier){
         otpService.generateAndSendOtp(identifier, "SIGNUP");
-        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+        return ResponseEntity.ok( Map.of(
+                "success", true,
+                "message", "OTP sent"
+        ));
     }
+
 
     @PostMapping("/signup/verify-otp")
-    public ResponseEntity<?> signupVerifyOtp(
-            @RequestParam String identifier,
-            @RequestParam String code) {
+    public ResponseEntity<?> signupVerifyOtp(@RequestParam String identifier,
+                                             @RequestParam String code) {
 
-        boolean ok = otpService.verifyOtp(identifier, code, "SIGNUP");
-        if (!ok)
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired OTP"));
+        VerifyOtpResponse response = otpService.verifyOtpForSignup(identifier, code);
 
-        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+        if (!response.isSuccess()) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return ResponseEntity.ok(response);
     }
+
+
 
     @PostMapping("/signup/complete")
     public ResponseEntity<?> signupComplete(@Valid @RequestBody SignUpRequest req) {
-        return ResponseEntity.ok(Map.of("message", authService.completeSignUp(req)));
+
+        // Input validation
+        if (!req.password.equals(req.confirmPassword)) {
+            return ResponseEntity.badRequest().body(
+                    new SignUpCompleteResponse(false, "Passwords do not match", null)
+            );
+        }
+
+        if (req.isAdult == null || !req.isAdult) {
+            return ResponseEntity.badRequest().body(
+                    new SignUpCompleteResponse(false, "User must be adult", null)
+            );
+        }
+
+        // Service will return final response
+        SignUpCompleteResponse response = authService.completeSignUp(req);
+
+        return ResponseEntity.ok(response);
     }
 
-    // ---------------- FORGOT PASSWORD FLOW ----------------
+
+
+    // Forget password OTP flow
     @PostMapping("/forget/request-otp")
-    public ResponseEntity<?> forgetRequestOtp(@RequestParam String identifier) {
+    public ResponseEntity<?> forgetRequestOtp(@RequestParam String identifier){
         otpService.generateAndSendOtp(identifier, "FORGOT");
-        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "OTP sent"
+        ));
     }
+
 
     @PostMapping("/forget/verify-otp")
-    public ResponseEntity<?> forgetVerifyOtp(
-            @RequestParam String identifier,
-            @RequestParam String code) {
+    public ResponseEntity<?> forgetVerifyOtp(@RequestParam String identifier,
+                                             @RequestParam String code) {
 
-        boolean ok = otpService.verifyOtp(identifier, code, "FORGOT");
-        if (!ok)
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired OTP"));
+        VerifyOtpResponse response = otpService.verifyOtpForSignup(identifier, code);
 
-        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+        if (!response.isSuccess()) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/forget/reset-password")
     public ResponseEntity<?> resetPassword(
@@ -78,4 +118,5 @@ public class AuthController {
         String msg = authService.resetPassword(identifier, newPassword);
         return ResponseEntity.ok(Map.of("message", msg));
     }
+
 }

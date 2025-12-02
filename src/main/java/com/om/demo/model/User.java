@@ -24,7 +24,7 @@ public class User {
     private String lastName;
 
     @Column(unique = true)
-    private String username; // unique username
+    private String username;
 
 
 
@@ -38,7 +38,6 @@ public class User {
 
     private String password;
 
-
     private boolean isProfileUpdated = false;
 
 
@@ -47,6 +46,15 @@ public class User {
 
 
     private String pincode;
+
+    private String country;
+    private String state;
+    private String district;
+    private String city;
+    private String area;
+
+
+
 
 
     @ManyToMany

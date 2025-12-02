@@ -1,11 +1,13 @@
 package com.om.demo.service;
 
-import com.om.demo.dto.SignInRequest;
-import com.om.demo.dto.SignUpRequest;
+import com.om.demo.dto.*;
 import com.om.demo.model.User;
 import com.om.demo.repository.UserRepository;
+import com.om.demo.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -13,27 +15,40 @@ public class AuthService {
     @Autowired
     UserRepository userRepo;
 
-    // -------- SIGN UP COMPLETE -----------
-    public String completeSignUp(SignUpRequest req) {
+    @Autowired
+    JwtUtil jwtUtil;
 
-        if (!req.password.equals(req.confirmPassword)) {
-            return "Passwords do not match";
+    // -------- SIGN UP COMPLETE -----------
+    public SignUpCompleteResponse completeSignUp(SignUpRequest req) {
+
+        // Business validations
+        if (userRepo.existsByEmail(req.email)) {
+            return new SignUpCompleteResponse(false, "Email already exists", null);
         }
 
-        if (userRepo.existsByEmail(req.email)) return "Email already exists";
-        if (userRepo.existsByPhone(req.phone)) return "Phone already exists";
+        if (userRepo.existsByPhone(req.phone)) {
+            return new SignUpCompleteResponse(false, "Phone already exists", null);
+        }
 
+        // Create new user
         User user = new User();
         user.setEmail(req.email);
         user.setPhone(req.phone);
         user.setPassword(req.password);
 
-        userRepo.save(user);
-        return "Signup successfully completed";
+        User savedUser = userRepo.save(user);
+
+        return new SignUpCompleteResponse(
+                true,
+                "Signup completed successfully",
+                savedUser
+        );
     }
 
     // -------- SIGN IN -----------
-    public String signIn(SignInRequest req) {
+
+    public Object signIn(SignInRequest req) {
+
         User user;
 
         if (req.identifier.contains("@")) {
@@ -42,13 +57,23 @@ public class AuthService {
             user = userRepo.findByPhone(req.identifier);
         }
 
-        if (user == null) return "User not found";
+        if (user == null)
+            return Map.of("error","User not found");
 
         if (!user.getPassword().equals(req.password))
-            return "Invalid password";
+            return Map.of("error","Invalid password");
 
-        return "Login successful";
+        // ---- token generate ----
+        String token = jwtUtil.generateToken(String.valueOf(user.getId()));
+
+        return Map.of(
+                "message", "Login successful",
+                "token", token,
+                "userId", user.getId()
+        );
     }
+
+
 
     // -------- RESET PASSWORD -----------
     public String resetPassword(String identifier, String newPassword) {
@@ -67,17 +92,4 @@ public class AuthService {
 
         return "Password reset successful";
     }
-
-    public String updateLocation(Long userId, Double lat, Double lng, String pincode){
-        User user = userRepo.findById(userId).orElse(null);
-        if (user == null) return "User not found";
-
-        user.setLatitude(lat);
-        user.setLongitude(lng);
-        user.setPincode(pincode);
-
-        userRepo.save(user);
-        return "Location updated";
-    }
-
 }

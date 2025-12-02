@@ -1,6 +1,6 @@
 package com.om.demo.service;
 
-import com.om.demo.dto.UpdateProfileRequest;
+import com.om.demo.dto.*;
 import com.om.demo.model.Interest;
 import com.om.demo.model.User;
 import com.om.demo.repository.InterestRepository;
@@ -19,20 +19,30 @@ public class UserService {
     @Autowired
     InterestRepository interestRepo;
 
-    public String updateProfile(Long userId, UpdateProfileRequest req) {
+    public ProfileResponse updateProfile(Long userId, UpdateProfileRequest req) {
+
         User user = userRepo.findById(userId).orElse(null);
 
-        if (user == null) return "User not found";
+        if (user == null) {
+            return new ProfileResponse(false, "User not found", null);
+        }
 
-        user.setFirstName(req.firstName);
-        user.setLastName(req.lastName);
-        user.setUsername(req.username);
-        user.setPhone(req.phone);
+        if (req.firstName != null) user.setFirstName(req.firstName);
+        if (req.lastName != null) user.setLastName(req.lastName);
+        if (req.username != null) user.setUsername(req.username);
+        if (req.phone != null) user.setPhone(req.phone);
+
         user.setProfileUpdated(true);
 
-        userRepo.save(user);
-        return "Profile updated";
+        User updatedUser = userRepo.save(user);
+
+        return new ProfileResponse(
+                true,
+                "Profile updated successfully",
+                updatedUser
+        );
     }
+
 
     public boolean isProfileUpdated(Long userId){
         User user = userRepo.findById(userId).orElse(null);
@@ -41,27 +51,60 @@ public class UserService {
         return user.isProfileUpdated();
     }
 
-    public String updateLocation(Long userId, Double lat, Double lng){
+    public LocationResponse updateLocation(Long userId, LocationUpdateRequest req) {
+
         User user = userRepo.findById(userId).orElse(null);
-        if (user == null) return "User not found";
+        if (user == null) {
+            return new LocationResponse(false, "User not found", null);
+        }
 
-        user.setLatitude(lat);
-        user.setLongitude(lng);
+        // Update coordinates
+        user.setLatitude(req.lat);
+        user.setLongitude(req.lng);
 
-        userRepo.save(user);
-        return "Location updated";
+        // Optional pincode
+        user.setPincode(req.pincode);
+
+        // New location fields
+        user.setCountry(req.country);
+        user.setState(req.state);
+        user.setDistrict(req.district);
+        user.setCity(req.city);
+        user.setArea(req.area);
+
+        User updatedUser = userRepo.save(user);
+
+        return new LocationResponse(
+                true,
+                "Location updated successfully",
+                updatedUser
+        );
     }
 
-    public String updateInterests(Long userId, List<Long> interestIds){
-        User user = userRepo.findById(userId).orElse(null);
-        if (user == null) return "User not found";
 
-        List<Interest> interests = interestRepo.findAllById(interestIds);
+    public InterestsResponse updateUserInterests(Long userId, InterestsRequest req) {
+
+        User user = userRepo.findById(userId).orElse(null);
+
+        if (user == null) {
+            return new InterestsResponse(false, "User not found", null);
+        }
+
+        // Fetch all interests by IDs
+        List<Interest> interests = interestRepo.findAllById(req.getInterestIds());
+
+        // Update user's interests
         user.setInterests(interests);
 
-        userRepo.save(user);
-        return "Interests updated";
+        User updatedUser = userRepo.save(user);
+
+        return new InterestsResponse(
+                true,
+                "Interests updated successfully",
+                updatedUser
+        );
     }
+
 
     // helper: return user (but avoid sending password in real app)
     public Object getUserForResponse(Long userId) {
