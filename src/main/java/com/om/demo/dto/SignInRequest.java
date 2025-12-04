@@ -5,8 +5,16 @@ import jakarta.validation.constraints.NotBlank;
 public class SignInRequest {
 
     @NotBlank
-    public String identifier;  // email OR phone
+    private String identifier;
 
     @NotBlank
-    public String password;
+    private String password;
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

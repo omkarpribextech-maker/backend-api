@@ -7,7 +7,6 @@ import com.om.demo.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 
 @Service
 public class AuthService {
@@ -46,34 +45,31 @@ public class AuthService {
     }
 
     // -------- SIGN IN -----------
-
-    public Object signIn(SignInRequest req) {
+    public SignInResponse signIn(SignInRequest req) {
 
         User user;
 
-        if (req.identifier.contains("@")) {
-            user = userRepo.findByEmail(req.identifier);
+        if (req.getIdentifier().contains("@")) {
+            user = userRepo.findByEmail(req.getIdentifier());
         } else {
-            user = userRepo.findByPhone(req.identifier);
+            user = userRepo.findByPhone(req.getIdentifier());
         }
 
+
         if (user == null)
-            return Map.of("error","User not found");
+            return new SignInResponse(null, null, "User not found");
 
-        if (!user.getPassword().equals(req.password))
-            return Map.of("error","Invalid password");
+        if (!user.getPassword().equals(req.getPassword()))
+            return new SignInResponse(null, null, "Invalid password");
 
-        // ---- token generate ----
         String token = jwtUtil.generateToken(String.valueOf(user.getId()));
 
-        return Map.of(
-                "message", "Login successful",
-                "token", token,
-                "userId", user.getId()
+        return new SignInResponse(
+                token,
+                user.getId(),
+                "Login successful"
         );
     }
-
-
 
     // -------- RESET PASSWORD -----------
     public String resetPassword(String identifier, String newPassword) {

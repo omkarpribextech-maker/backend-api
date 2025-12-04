@@ -1,10 +1,7 @@
 package com.om.demo.controller;
 
 
-import com.om.demo.dto.SignInRequest;
-import com.om.demo.dto.SignUpCompleteResponse;
-import com.om.demo.dto.SignUpRequest;
-import com.om.demo.dto.VerifyOtpResponse;
+import com.om.demo.dto.*;
 import com.om.demo.service.AuthService;
 import com.om.demo.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +25,9 @@ public class AuthController {
     @Autowired
     private OtpService otpService;
 
-
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req){
-        return ResponseEntity.ok(Map.of("message", authService.signIn(req)));
+    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest req){
+        return ResponseEntity.ok(authService.signIn(req));
     }
 
 
