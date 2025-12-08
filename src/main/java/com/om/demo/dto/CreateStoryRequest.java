@@ -9,4 +9,6 @@ public class CreateStoryRequest {
     public String mediaUrl;
     public Double lat;
     public Double lng;
+
+
 }

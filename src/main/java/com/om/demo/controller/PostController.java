@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -18,14 +20,16 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<?> createPost(@RequestBody CreatePostRequest req) {
-        Post p = postService.createPost(req);
-        return ResponseEntity.ok(p);
+       // Post p = postService.createPost(req);
+        return ResponseEntity.ok(Map.of("success",true,
+                "message","Post Created","post",postService.createPost(req)));
     }
 
     @GetMapping("/feed")
-    public ResponseEntity<?> feed(@RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(postService.getFeed(PageRequest.of(page, size)));
+    public ResponseEntity<?>feed(@RequestParam(defaultValue = "0")int page,
+                                 @RequestParam(defaultValue = "20")int size,
+                                 @RequestParam Long userId){
+        return ResponseEntity.ok(postService.getFeed(PageRequest.of(page,size),userId));
     }
 
     @PostMapping("/{postId}/like")
@@ -35,8 +39,8 @@ public class PostController {
 
     @PostMapping("/{postId}/comment")
     public ResponseEntity<?> comment(@PathVariable Long postId, @RequestBody CommentRequest req) {
-        PostComment c = postService.addComment(postId, req.getUserId(), req.getText());
-        return ResponseEntity.ok(c);
+       // PostComment c = postService.addComment(postId, req.getUserId(), req.getText());
+        return ResponseEntity.ok(postService.addComment(postId,req.getUserId(),req.getText()));
     }
 
     @PostMapping("/{postId}/bookmark")
