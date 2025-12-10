@@ -13,6 +13,8 @@ import java.util.*;
 @Service
 public class PostService {
 
+    @Autowired NotificationService notificationService;
+
     @Autowired PostRepository postRepo;
     @Autowired PostMediaRepository mediaRepo;
     @Autowired PostLikeRepository likeRepo;
@@ -93,7 +95,6 @@ public class PostService {
     public Map<String,Object> toggleLike(Long postId, Long userId) {
 
         Post post = postRepo.findById(postId).orElseThrow();
-
         User user = userRepo.findById(userId).orElseThrow();
 
         Optional<PostLike> ex = likeRepo.findByPostIdAndUserId(postId, userId);
@@ -102,7 +103,7 @@ public class PostService {
 
         if (ex.isPresent()) {
             likeRepo.delete(ex.get());
-            post.setLikesCount(Math.max(0, post.getLikesCount()-1));
+            post.setLikesCount(Math.max(0, post.getLikesCount() - 1));
             liked = false;
         } else {
             PostLike pl = new PostLike();
@@ -110,16 +111,19 @@ public class PostService {
             pl.setUser(user);
             likeRepo.save(pl);
 
-            post.setLikesCount(post.getLikesCount()+1);
+            post.setLikesCount(post.getLikesCount() + 1);
             liked = true;
 
+            // SEND NOTIFICATION
             if (!post.getUser().getId().equals(userId)) {
-                Notification n = new Notification();
-                n.setUser(post.getUser());
-                n.setType("LIKE");
-                n.setActor(user);
-                n.setPostId(postId);
-                notificationRepo.save(n);
+                notificationService.send(
+                        post.getUser().getId(),   // post owner
+                        userId,                   // actor
+                        "LIKE",
+                        postId,
+                        null,
+                        "{\"message\":\"liked your post\"}"
+                );
             }
         }
 
@@ -133,6 +137,7 @@ public class PostService {
     }
 
 
+
     public Map<String, Object> addComment(Long postId, Long userId, String text) {
 
         Post post = postRepo.findById(postId).orElseThrow();
@@ -142,18 +147,22 @@ public class PostService {
         c.setPost(post);
         c.setUser(user);
         c.setText(text);
+
         c = commentRepo.save(c);
 
         post.setCommentsCount(post.getCommentsCount() + 1);
         postRepo.save(post);
 
+        // SEND NOTIFICATION
         if (!post.getUser().getId().equals(userId)) {
-            Notification n = new Notification();
-            n.setUser(post.getUser());
-            n.setActor(user);
-            n.setType("COMMENT");
-            n.setPostId(postId);
-            notificationRepo.save(n);
+            notificationService.send(
+                    post.getUser().getId(),
+                    userId,
+                    "COMMENT",
+                    postId,
+                    null,
+                    "{\"text\":\"" + text + "\"}"
+            );
         }
 
         return Map.of(
@@ -163,6 +172,7 @@ public class PostService {
                 "commentsCount", post.getCommentsCount()
         );
     }
+
 
 
     public Map<String,Object> toggleBookmark(Long postId, Long userId) {

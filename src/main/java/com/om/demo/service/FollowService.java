@@ -14,6 +14,8 @@ import java.util.Optional;
 @Service
 public class FollowService {
 
+    @Autowired NotificationService notificationService;
+
     @Autowired FollowRepository followRepo;
     @Autowired UserRepository userRepo;
     @Autowired NotificationRepository notificationRepo;
@@ -27,14 +29,18 @@ public class FollowService {
         f.setFollowee(userRepo.findById(targetUserId).orElseThrow());
         followRepo.save(f);
 
-        // notify
-        Notification n = new Notification();
-        n.setUser(f.getFollowee());
-        n.setType("FOLLOW");
-        n.setActor(f.getFollower());
-        notificationRepo.save(n);
+        notificationService.send(
+                targetUserId,
+                followerId,
+                "FOLLOW",
+                null,
+                null,
+                "{\"message\":\"started following you\"}"
+        );
 
         return "Followed";
+
+
     }
 
     public String unfollow(Long followerId, Long targetUserId) {

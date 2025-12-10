@@ -31,14 +31,23 @@ public class Story {
     private Instant createdAt = Instant.now();
     private Instant expiresAt;
 
-    private Integer fbs;
+    private Integer fps;
     private Double locationLat;
     private Double locationLng;
 
     private int viewsCount = 0;
 
-    public void setFps(int fps) {
-    }
+    // Privacy type: PUBLIC, FRIENDS, HIDE, ONLY
+    private String privacy;
+
+    // For hide list
+    @ElementCollection
+    private List<Long> hideUserIds;
+
+    // For only / close friends
+    @ElementCollection
+    private List<Long> onlyUserIds;
+
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<StoryView> views;

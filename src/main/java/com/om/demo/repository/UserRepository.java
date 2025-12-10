@@ -24,5 +24,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
                LOWER(u.lastName) LIKE LOWER(CONCAT('%', :q, '%'))
            """)
     List<User> searchUsers(String q);
+    @Query("""
+       SELECT COUNT(f) > 0 FROM Friend f
+       WHERE (f.user1.id = :u1 AND f.user2.id = :u2)
+          OR (f.user1.id = :u2 AND f.user2.id = :u1)
+       """)
+    boolean areFriends(Long u1, Long u2);
+
 
 }
