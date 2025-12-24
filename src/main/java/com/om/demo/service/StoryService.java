@@ -9,20 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class StoryService {
@@ -52,8 +45,15 @@ public class StoryService {
         story.setLocationLng(req.getLng());
 
         story.setPrivacy(req.getPrivacy());
+
         story.setHideUserIds(req.getHideUserIds());
         story.setOnlyUserIds(req.getOnlyUserIds());
+        story.setStoryId(req.getStoryId());
+        story.setChunkIndex(req.getChunkIndex());
+        story.setParentVideoId(req.getParentVideoId());
+        story.setIsLastChunk(req.getIsLastChunk());
+        story.setThumbnailUrl(req.getThumbnailUrl());
+        story.setStatus(req.getStatus());
 
 
         story.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
@@ -63,90 +63,6 @@ public class StoryService {
         return mapToResponse(saved);
     }
 
-
-//    public StoryResponse createStory(Long userId, MultipartFile media, Double lat, Double lng) throws Exception {
-//
-//        // Limit check
-//        Instant last24 = Instant.now().minus(24, ChronoUnit.HOURS);
-//        int count = storyRepo.countByUserIdAndCreatedAtAfter(userId, last24);
-//        if (count >= 15)
-//            throw new RuntimeException("Story limit exceeded (Max 15 stories per 24 hours)");
-//
-//        // File size validation
-//        long sizeMB = media.getSize() / (1024 * 1024);
-//        if (sizeMB > 10)
-//            throw new RuntimeException("Story file too large (max 10MB)");
-//
-//        // Media type
-//        String contentType = media.getContentType();
-//        boolean isVideo = contentType.startsWith("video");
-//        boolean isImage = contentType.startsWith("image");
-//
-//        if (!isVideo && !isImage)
-//            throw new RuntimeException("Only image/video allowed");
-//
-//        int width = 0, height = 0, fps = 0;
-//        double duration = 0;
-//
-//        // Extract info
-//        if (isVideo) {
-//            VideoInfo info = extractVideoInfo(media);
-//            width = info.width;
-//            height = info.height;
-//            duration = info.duration;
-//            fps = info.fps;
-//
-//            if (duration > 20)
-//                throw new RuntimeException("Max 20 seconds video allowed");
-//
-//            if (height > 720)
-//                throw new RuntimeException("Max 720p allowed");
-//
-//            if (fps > 30)
-//                throw new RuntimeException("Max 30fps allowed");
-//
-//        } else {
-//            BufferedImage img = ImageIO.read(media.getInputStream());
-//            width = img.getWidth();
-//            height = img.getHeight();
-//
-//            if (width > 1080)
-//                throw new RuntimeException("Image width max 1080px allowed");
-//        }
-//
-//        double aspectRatio = (double) width / height;
-//
-//        // SAVE file
-//        String fileName = System.currentTimeMillis() + "_" + media.getOriginalFilename();
-//        Path savePath = Paths.get("uploads/stories/" + fileName);
-//        Files.createDirectories(savePath.getParent());
-//        Files.write(savePath, media.getBytes());
-//        String mediaUrl = "/uploads/stories/" + fileName;
-//
-//        // Save Story entity
-//        Story s = new Story();
-//        s.setUser(userRepo.findById(userId).orElseThrow());
-//
-//        s.setMediaUrl(mediaUrl);
-//        s.setType(isVideo ? "video" : "image");
-//        s.setContentType("story");
-//
-//        s.setWidth(width);
-//        s.setHeight(height);
-//        s.setAspectRatio(aspectRatio);
-//        s.setDuration(duration);
-//        s.setFps(fps);
-//
-//        s.setLocationLat(lat);
-//        s.setLocationLng(lng);
-//
-//        s.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
-//
-//        Story saved = storyRepo.save(s);
-//
-//        // RETURN FINAL RESPONSE
-//        return mapToResponse(saved);
-//    }
 
     static class VideoInfo {
         int width;
@@ -214,6 +130,14 @@ public class StoryService {
         r.setViewsCount(s.getViewsCount());
 
         r.setUser(s.getUser());
+
+        r.setStoryId(s.getStoryId());
+        r.setChunkIndex(s.getChunkIndex());
+        r.setParentVideoId(s.getParentVideoId());
+        r.setIsLastChunk(s.getIsLastChunk());
+        r.setThumbnailUrl(s.getThumbnailUrl());
+        r.setStatus(s.getStatus());
+
 
         return r;
     }

@@ -52,6 +52,8 @@ public class User {
     private String district;
     private String city;
     private String area;
+    private String profilePic;
+
 
 
 

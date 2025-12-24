@@ -31,6 +31,15 @@ public class Story {
     private Instant createdAt = Instant.now();
     private Instant expiresAt;
 
+
+    private String storyId;        // unique id for video-story session
+    private Integer chunkIndex;    // video chunk number
+    private String parentVideoId;  // main video id (if any)
+    private Boolean isLastChunk;   // last chunk?
+    private String thumbnailUrl;   // thumbnail image
+    private String status;         // active/processing/error
+
+
     private Integer fps;
     private Double locationLat;
     private Double locationLng;

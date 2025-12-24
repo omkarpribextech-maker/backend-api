@@ -23,4 +23,11 @@ public class CreateStoryRequest {
     private List<Long> hideUserIds;
     private List<Long> onlyUserIds;
 
+    private String storyId;
+    private Integer chunkIndex;
+    private String parentVideoId;
+    private Boolean isLastChunk;
+    private String thumbnailUrl;
+    private String status;
+
 }

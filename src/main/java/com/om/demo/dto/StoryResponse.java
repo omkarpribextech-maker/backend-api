@@ -25,5 +25,13 @@ public class StoryResponse {
 
     private Integer viewsCount;
 
+    private String storyId;
+    private Integer chunkIndex;
+    private String parentVideoId;
+    private Boolean isLastChunk;
+    private String thumbnailUrl;
+    private String status;
+
+
     private User user;
 }
