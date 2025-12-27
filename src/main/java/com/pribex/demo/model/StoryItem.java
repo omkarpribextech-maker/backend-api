@@ -1,7 +1,6 @@
 package com.pribex.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.pribex.demo.dto.StoryOverlay;
 import com.pribex.demo.dto.TextOverlay;
 import com.pribex.demo.enums.StoryItemType;
 import jakarta.persistence.*;
