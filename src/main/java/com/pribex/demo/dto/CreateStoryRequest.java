@@ -1,0 +1,38 @@
+package com.pribex.demo.dto;
+
+import com.pribex.demo.enums.StoryType;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter @Setter
+public class CreateStoryRequest {
+    private Long userId;
+    private String mediaUrl;
+    private String mediaType;    // image | video
+    private String contentType;  // story
+
+    private Integer width;
+    private Integer height;
+    private Double aspectRatio;
+    private Double duration;
+
+    private Double lat;
+    private Double lng;
+    private List<Long> hideUserIds;
+    private List<Long> onlyUserIds;
+
+    private String storyId;
+    private Integer chunkIndex;
+    private String parentVideoId;
+    private Boolean isLastChunk;
+    private String thumbnailUrl;
+    private String status;
+
+    private StoryOverlay overlays;
+
+    private StoryType storyType;
+    private StoryPrivacy privacy;
+    private List<CreateStoryItemRequest> items;
+}
